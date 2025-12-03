@@ -1,4 +1,4 @@
-// src/components/profile/Profile.tsx
+
 import { useEffect, useState } from "react";
 import {
   Link,
@@ -258,6 +258,27 @@ const Profile = () => {
             </div>
           </div>
 
+            {/* Botão EDITAR PERFIL — aparece somente no próprio perfil */}
+{loggedId === profileId && (
+  <div className="flex justify-center gap-4">
+    <Link
+      to={`/update-profile/${loggedId}`}
+      className="h-12 bg-dark-4 px-5 text-light-1 flex-center gap-2 rounded-lg"
+    >
+      <img
+        src="/assets/icons/edit.svg"
+        alt="edit"
+        width={20}
+        height={20}
+      />
+      <p className="flex whitespace-nowrap small-medium">
+        Editar Perfil
+      </p>
+    </Link>
+  </div>
+)}
+
+
           {/* Buttons: hide when viewing own profile or if no logged user */}
           {loggedId && loggedId !== profileId && (
             <div className="flex gap-4">
@@ -303,12 +324,32 @@ const Profile = () => {
 
       {/* Tabs (only for own profile) */}
       {loggedId === profileId && (
-        <div className="tabs">
-          <Link className={pathname.includes("liked-posts") ? "" : "active"} to={`/profile/${profileId}`}>
-            Postados
+        <div className="flex max-w-5xl w-full">
+          <Link
+            to={`/profile/${profileId}`}
+            className={`profile-tab rounded-l-lg ${
+              pathname === `/profile/${profileId}` && "!bg-dark-3"
+            }`}>
+            <img
+              src={"/assets/icons/posts.svg"}
+              alt="posts"
+              width={20}
+              height={20}
+            />
+            Posts
           </Link>
-          <Link className={pathname.includes("liked-posts") ? "active" : ""} to={`/profile/${profileId}/liked-posts`}>
-            Curtidos
+          <Link
+            to={`/profile/${profileId}/liked-posts`}
+            className={`profile-tab rounded-r-lg ${
+              pathname === `/profile/${profileId}/liked-posts` && "!bg-dark-3"
+            }`}>
+            <img
+              src={"/assets/icons/like.svg"}
+              alt="like"
+              width={20}
+              height={20}
+            />
+            Liked Posts
           </Link>
         </div>
       )}
