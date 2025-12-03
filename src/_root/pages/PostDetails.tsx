@@ -24,13 +24,13 @@ const PostDetails = () => {
             className="post_details-img"
           />
           <div className="post_details-info">
-              <div className="flex between w-full">
+              <div className="flex between w-full gap-5">
 
             <Link to={`/profile/${post?.creator.$id}`} className="flex items-center gap-3">
                 <img 
                 src={post?.creator?.imageUrl || '/assets/icons/profile-placeholder.svg'}
                 alt="Criador"
-                className="rounded-full w-8 h-8 lg:w-12 h-12"
+                className="rounded-full w-12 h-12 lg: w-15 h-15"
                 />
             
             
@@ -49,6 +49,7 @@ const PostDetails = () => {
               </div>
             </div>
             </Link>
+            
               <div className="flex-center">
                 <Link to={`/update-post/${post?.$id}`} className={`${user.id !== post?.creator.$id && 'hidden'}`}>
                   <img src="/assets/icons/edit.svg" width={24} height={24} alt="Editar" />
