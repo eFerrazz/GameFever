@@ -144,13 +144,17 @@ const PostForm = ({ post, action }: PostFormProps) => {
         >
             Cancelar
             </Button>
-        <Button 
-        type="submit"
-        className="shad-button_primary whitespace-nowrap"
-        disabled={isLoadingCreate || isLoadingUpdate}
-        >
-          {isLoadingCreate || isLoadingUpdate ? 'Loading...': action}
-           Posts
+                  <Button 
+              type="submit"
+              className="shad-button_primary whitespace-nowrap"
+              disabled={isLoadingCreate || isLoadingUpdate}
+            >
+              {isLoadingCreate || isLoadingUpdate 
+                ? "Carregando..." 
+                : action === "Create" 
+                  ? "Postar" 
+                  : "Salvar alterações"
+              }
             </Button>
         </div>
       </form>
