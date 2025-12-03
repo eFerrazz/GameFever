@@ -6,6 +6,8 @@ import {
   useParams,
   useLocation,
   useNavigate,
+  Routes,
+  Route,
 } from "react-router-dom";
 import {
   useCreateConversation,
@@ -22,6 +24,7 @@ import Loader from "@/components/shared/Loader";
 import GridPostList from "@/components/shared/GridPostList";
 import { Button } from "@/components/ui/button";
 import { getUserById } from "@/lib/appwrite/api";
+import LikedPosts from "./LikedPosts";
 
 type UserListModalProps = {
   userIds: string[];
@@ -245,7 +248,7 @@ const Profile = () => {
                 onClick={() => setShowFollowersModal(true)}
               >
                 <p className="text-primary-500">{followersIds?.length || 0}</p>
-                <p className="text-light-2">Followers</p>
+                <p className="text-light-2">Seguidores</p>
               </div>
 
               <div
@@ -253,7 +256,7 @@ const Profile = () => {
                 onClick={() => setShowFollowingModal(true)}
               >
                 <p className="text-primary-500">{followingIds?.length || 0}</p>
-                <p className="text-light-2">Following</p>
+                <p className="text-light-2">Seguindo</p>
               </div>
             </div>
           </div>
@@ -349,19 +352,23 @@ const Profile = () => {
               width={20}
               height={20}
             />
-            Liked Posts
+            Posts curtidos
           </Link>
         </div>
       )}
 
-      {/* Posts: show unless in liked-posts route */}
-      {!pathname.includes("liked-posts") && (
-        <div className="profile-posts mt-6">
-          <GridPostList posts={currentUser.posts || []} />
-        </div>
-      )}
+      
 
       {/* Outlet for nested routes like liked-posts */}
+      <Routes>
+        <Route
+          index
+          element={<GridPostList posts={currentUser.posts} showStats={false} showUser={false} />}
+        />
+        {currentUser.$id === user.id && (
+          <Route path="/liked-posts" element={<LikedPosts />} />
+        )}
+      </Routes>
       <Outlet />
     </div>
   );
