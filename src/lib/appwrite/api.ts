@@ -439,13 +439,78 @@ export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
 }
 
 export async function searchPosts(searchTerm: string) {
-    try {
-        const posts = await databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.postCollectionId, [Query.search('caption', searchTerm)])
+  if (!searchTerm || searchTerm.trim().length === 0) {
+    return { total: 0, documents: [] };
+  }
 
-        if (!posts) throw Error
+  try {
+    const captionResults = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [Query.search('caption', searchTerm)]
+    );
 
-        return posts
-    } catch (error) {
-        console.log(error)
-    }
+    const locationResults = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [Query.search('location', searchTerm)]
+    );
+
+    const tagsResults = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [Query.equal('tags', searchTerm)]
+    );
+
+    const combinedDocsMap = new Map<string, any>();
+
+    [captionResults, locationResults, tagsResults].forEach((result) => {
+      if (result?.documents) {
+        result.documents.forEach((doc: any) => {
+          combinedDocsMap.set(doc.$id, doc);
+        });
+      }
+    });
+
+    const combinedDocuments = Array.from(combinedDocsMap.values());
+
+    return {
+      total: combinedDocuments.length,
+      documents: combinedDocuments,
+    };
+  } catch {
+    return { total: 0, documents: [] };
+  }
 }
+
+
+
+
+
+export async function searchUsers(searchTerm: string) {
+  try {
+    const [byName, byUsername] = await Promise.all([
+      databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.userColletionId, [
+        Query.search('name', searchTerm),
+      ]),
+      databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.userColletionId, [
+        Query.search('username', searchTerm),
+      ]),
+    ]);
+
+    if (!byName || !byUsername) throw Error;
+
+    // Juntar os documentos, removendo duplicatas pelo id
+    const combinedDocs = [
+      ...byName.documents,
+      ...byUsername.documents.filter(
+        (u) => !byName.documents.some((user) => user.$id === u.$id)
+      ),
+    ];
+
+    return { documents: combinedDocs };
+  } catch (error) {
+    console.log(error);
+  }
+}
+
