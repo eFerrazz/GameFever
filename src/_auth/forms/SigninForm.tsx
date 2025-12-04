@@ -125,6 +125,17 @@ useSignInAccount();
                   <Link to="/sign-up" className="text-primary-500 text-small-semibold ml-1 ">Criar conta</Link>
               </p>
 
+
+                {/* Link para esqueci a senha */}
+          <div className="text-right mt-1">
+            <Link
+              to="/forgot-password"
+              className="text-primary-500 text-small-semibold hover:underline"
+            >
+              Esqueceu a senha?
+            </Link>
+          </div>
+
           </form>
        </div>
     </Form>
