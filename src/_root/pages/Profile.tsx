@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Link,
@@ -307,6 +306,12 @@ const Profile = () => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-4 max-w-full">
+        <p className="text-light-1 text-base md:text-lg font-normal leading-relaxed text-left whitespace-pre-wrap">
+          {currentUser.bio}
+        </p>
       </div>
 
       {/* Modals */}
