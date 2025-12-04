@@ -4,7 +4,7 @@ import{
     useQueryClient,
     useInfiniteQuery
 } from  '@tanstack/react-query'
-import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getInfinitePosts, GetPostById, GetRecentPosts, getUserById, getUsers, likePost, savePost, searchPosts, SignInAccount, signOutAccount, updatePost, updateUser } from '../appwrite/api'
+import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getInfinitePosts, GetPostById, GetRecentPosts, getUserById, getUsers, likePost, savePost, searchPosts, searchUsers, SignInAccount, signOutAccount, updatePost, updateUser } from '../appwrite/api'
 import type { IConversation, IMessage, INewPost, INewUser, ISendMessage, IUpdatePost, IUpdateUser } from '@/types'
 import { QUERY_KEYS } from './queryKeys';
 
@@ -280,8 +280,15 @@ export const useGetPosts = () => {
 
 export const useSearchPosts = (searchTerm: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm],
+    queryKey: ['searchPosts', searchTerm],
     queryFn: () => searchPosts(searchTerm),
+    enabled: !!searchTerm,
+  });
+};
+export const useSearchUsers = (searchTerm: string) => {
+  return useQuery({
+    queryKey: ['searchUsers', searchTerm],
+    queryFn: () => searchUsers(searchTerm),
     enabled: !!searchTerm,
   });
 };
@@ -331,3 +338,4 @@ export const useSendMessage = () => {
     },
   });
 };
+
