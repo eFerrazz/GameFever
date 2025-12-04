@@ -37,7 +37,7 @@ export default function ResetPassword() {
     }
 
     try {
-      await account.updateRecovery(secret, userId, data.password);
+      await account.updateRecovery(userId, secret, data.password);
       toast({ title: "Senha alterada com sucesso!" });
       navigate("/sign-in");
     } catch (error: any) {
