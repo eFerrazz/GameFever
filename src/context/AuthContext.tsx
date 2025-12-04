@@ -54,13 +54,28 @@ const AuthProvider = ({ children }: { children: React.ReactNode}) => {
     };
 
     useEffect(() => {
-        if(
-            localStorage.getItem('cookieFallback') === '[]' ||
-            localStorage.getItem('cookieFallback') === null
-        
-        )navigate('/sign-in')
-        checkAuthUser();
-    },[]);
+    const publicRoutes = [
+        "/sign-in",
+        "/sign-up",
+        "/forgot-password",
+        "/reset-password",
+    ];
+
+    const currentPath = window.location.pathname;
+
+    const noCookies =
+        localStorage.getItem("cookieFallback") === "[]" ||
+        localStorage.getItem("cookieFallback") === null;
+
+    // Só redirecionar se estiver tentando acessar rota privada
+    if (noCookies && !publicRoutes.includes(currentPath)) {
+        navigate("/sign-in");
+        return;
+    }
+
+    checkAuthUser();
+}, []);
+
 
     const value ={
         user,
