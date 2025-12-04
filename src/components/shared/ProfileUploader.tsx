@@ -1,43 +1,166 @@
-import { useCallback, useState } from 'react'
-import { useDropzone, type FileWithPath } from 'react-dropzone'
+import * as z from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 
-import { convertFileToUrl } from "@/lib/utils";
+import { useUserContext } from '@/context/AuthContext'
+import Loader from '@/components/shared/Loader'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 
-type ProfileUploaderProps = {
-    fieldChange: (files: File[]) => void
-    mediaUrl: string
-}
+import { useGetUserById, useUpdateUser } from '@/lib/react-query/queriesAndMutations'
+import { ProfileValidation } from '@/lib/validation'
+import { useToast } from '@/hooks/use-toast'
+import ProfileUploader from '@/components/shared/ProfileUploader'
 
-const ProfileUploader = ({ fieldChange, mediaUrl }: ProfileUploaderProps) => {
-    const [file, setFile] = useState<File[]>([])
-    const [fileUrl, setFileUrl] = useState<string>(mediaUrl)
-
-    const onDrop = useCallback(
-        (acceptedFiles: FileWithPath[]) => {
-            setFile(acceptedFiles)
-            fieldChange(acceptedFiles)
-            setFileUrl(convertFileToUrl(acceptedFiles[0]))
-        },
-        [file]
-    )
-
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop,
-        accept: {
-            'image/*': ['.png', '.jpeg', '.jpg'],
+const UpdateProfile = () => {
+    const { toast } = useToast()
+    const navigate = useNavigate()
+    const { id } = useParams()
+    const { user, setUser } = useUserContext()
+    const form = useForm<z.infer<typeof ProfileValidation>>({
+        resolver: zodResolver(ProfileValidation),
+        defaultValues: {
+            file: [],
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            bio: user.bio || '',
         },
     })
 
-    return (
-        <div {...getRootProps()}>
-            <input {...getInputProps()} className="cursor-pointer" />
+    // Queries
+    const { data: currentUser } = useGetUserById(id || '')
+    const { mutateAsync: updateUser, isPending: isLoadingUpdate } = useUpdateUser()
 
-            <div className="cursor-pointer flex-center gap-4">
-                <img src={fileUrl || '/assets/icons/profile-placeholder.svg'} alt="image" className="h-24 w-24 rounded-full object-cover object-top" />
-                <p className="text-primary-500 small-regular md:bbase-semibold">Change profile photo</p>
+    if (!currentUser)
+        return (
+            <div className="flex-center w-full h-full">
+                <Loader />
+            </div>
+        )
+
+    // Handler
+    const handleUpdate = async (value: z.infer<typeof ProfileValidation>) => {
+        const updatedUser = await updateUser({
+            userId: currentUser.$id,
+            name: value.name,
+            bio: value.bio,
+            file: value.file,
+            imageUrl: currentUser.imageUrl,
+            imageId: currentUser.imageId,
+        })
+
+        if (!updatedUser) {
+            toast({
+                title: `Update user failed. Please try again.`,
+            })
+        }
+
+        setUser({
+            ...user,
+            name: updatedUser?.name,
+            bio: updatedUser?.bio,
+            imageUrl: updatedUser?.imageUrl,
+        })
+        return navigate(`/profile/${id}`)
+    }
+
+    return (
+        <div className="flex flex-1">
+            <div className="common-container">
+                <div className="flex-start gap-3 justify-start w-full max-w-5xl">
+                    <img src="/assets/icons/edit.svg" width={36} height={36} alt="edit" className="invert-white" />
+                    <h2 className="h3-bold md:h2-bold text-left w-full">Editar Perfil</h2>
+                </div>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleUpdate)} className="flex flex-col gap-7 w-full mt-4 max-w-5xl">
+                        <FormField
+                            control={form.control}
+                            name="file"
+                            render={({ field }) => (
+                                <FormItem className="flex">
+                                    <FormControl>
+                                        <ProfileUploader fieldChange={field.onChange} mediaUrl={currentUser.imageUrl} />
+                                    </FormControl>
+                                    <FormMessage className="shad-form_message" />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="shad-form_label">Nome</FormLabel>
+                                    <FormControl>
+                                        <Input type="text" className="shad-input" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="shad-form_label">Usuário</FormLabel>
+                                    <FormControl>
+                                        <Input type="text" className="shad-input" {...field} disabled />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="shad-form_label">Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="text" className="shad-input" {...field} disabled />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="bio"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="shad-form_label">Bio</FormLabel>
+                                    <FormControl>
+                                        <Textarea className="shad-textarea custom-scrollbar" {...field} />
+                                    </FormControl>
+                                    <FormMessage className="shad-form_message" />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="flex gap-4 items-center justify-end">
+                            <Button type="button" className="shad-button_dark_4" onClick={() => navigate(-1)}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit" className="shad-button_primary whitespace-nowrap" disabled={isLoadingUpdate}>
+                                {isLoadingUpdate && <Loader />}
+                                Atualizar Perfil
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </div>
         </div>
     )
 }
 
-export default ProfileUploader
+export default UpdateProfile
