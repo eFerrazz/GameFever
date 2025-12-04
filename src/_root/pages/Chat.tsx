@@ -256,7 +256,7 @@ const Chat: React.FC = () => {
             </header>
 
             {/* MENSAGENS */}
-            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-6 flex flex-col gap-4 custom-scrollbar">
               {loadingMessages ? (
                 <p className="text-lg text-light-3">Carregando mensagens...</p>
               ) : messages.length === 0 ? (
